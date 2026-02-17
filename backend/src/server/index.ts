@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 
 
 const app = express();
+app.use(cookieParser())
 const saltRounds = 10;
 app.post("/auth/signup",async(req,res)=>{
     const {email, password} = req.body;
