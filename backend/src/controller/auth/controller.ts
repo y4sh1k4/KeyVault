@@ -41,14 +41,14 @@ export const signUpController = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     return res.status(201).json({
       accessToken,
     });
   } catch (err) {
-    console.log("error", err);
+    console.log("error in signUpController", err);
     res.status(500).json({
       message: "Internal Server Error",
     });
@@ -58,6 +58,7 @@ export const signUpController = async (req: Request, res: Response) => {
 export const logInController = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    console.log("email", email, password);
     const parseBody = signupSchema.safeParse(req.body);
     if (!parseBody.success) {
       return res.status(400).json({ message: "Invalid request body" });
@@ -66,11 +67,13 @@ export const logInController = async (req: Request, res: Response) => {
       where: { email: email },
     });
     if (!existing) {
+      console.log("User not found");
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const correctPassword = await bcrypt.compare(password, existing.password);
     if (!correctPassword) {
+      console.log("Incorrect password");
       return res.status(401).json({ message: "Incorrect Password" });
     }
 
@@ -86,7 +89,7 @@ export const logInController = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     return res.status(200).json({
@@ -101,8 +104,9 @@ export const logInController = async (req: Request, res: Response) => {
 }
 
 export const refreshTokenController = async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
+    console.log("No refresh token in request");
     return res.status(400).json({
       message: "no refresh token in body",
     });
@@ -118,6 +122,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
       where: { id: Number(userId) },
     });
     if (!user || user.refreshToken !== refreshToken) {
+      console.log("User not found or invalid refresh token");
       return res.status(404).json({
         message: "No user with this token found",
       });
@@ -134,7 +139,7 @@ export const refreshTokenController = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     return res.status(200).json({
@@ -149,12 +154,18 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 
 export const logOutController = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req;
 
     await prisma.user.update({
       where: { id: Number(userId) },
       data: { refreshToken: null },
     });
+
+    res.clearCookie("refreshToken", {  
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    })
 
     res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {

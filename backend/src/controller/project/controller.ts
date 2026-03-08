@@ -70,3 +70,35 @@ export const getProjectController = async (req: Request, res: Response)=>{
     });
   }
 }
+
+export const getProjectByIdController = async (req: Request, res: Response)=>{
+  try{
+    const { userId } = req;
+    if (!userId) {
+      return res.status(401).json({
+        message: "User not authenticated",
+      });
+    }
+    const { pid } = req.body;
+    const project = await prisma.project.findFirst({
+      where: {
+        pid: Number(pid),
+        userId: Number(userId),
+      },
+    });
+    if(!project){
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+    return res.status(200).json({
+      project,
+    });
+  }
+  catch(e){
+    console.log("error", e);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+}

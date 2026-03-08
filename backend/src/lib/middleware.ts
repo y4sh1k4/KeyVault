@@ -2,8 +2,9 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction)=>{
-    const { authHeader } = req.headers;
+    const authHeader = req.headers.authorization;
     if (!authHeader || typeof authHeader !== "string") {
+        console.log("authHeader", authHeader, typeof authHeader !== "string")
         return res.status(401).json({
             message: "No authorization header provided"
         });
