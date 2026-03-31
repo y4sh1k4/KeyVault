@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { getAccessToken, refreshAccessToken } from "@/utils/accessToken";
 import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/AuthStore";
 
 const publicRoutes = ["/", "/login", "/signup"];
 export default function AuthProvider({
@@ -10,6 +11,7 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const [loading, setLoading] = useState(() => !getAccessToken());
+  const login = useAuthStore((state) => state.login);
   const router = useRouter();
   const pathname = usePathname();
   const isPublicRoute = publicRoutes.includes(pathname);
@@ -18,12 +20,8 @@ export default function AuthProvider({
       console.log("No access token found, attempting to refresh");
       refreshAccessToken()
         .then((newToken) => {
-          console.log(
-            "Refresh token response received",
-            newToken,
-            isPublicRoute,
-          );
           if (newToken && isPublicRoute) {
+            login(newToken.email, newToken.accessToken);
             router.push("/dashboard");
           } else {
             if (!["/login", "/signup"].includes(pathname)) {

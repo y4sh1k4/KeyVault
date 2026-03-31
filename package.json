@@ -1,9 +1,17 @@
 {
   "scripts": {
-    "prepare":"husky"
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
+    "eslint-config-next": "^16.2.1",
+    "eslint-plugin-react": "^7.37.5",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7"
+    "lint-staged": "^16.2.7",
+    "prisma": "^7.5.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.5.0"
   }
 }

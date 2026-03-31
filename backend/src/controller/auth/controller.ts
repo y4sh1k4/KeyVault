@@ -2,7 +2,7 @@ import { generateAccessToken, generateRefreshToken } from "../../lib/jwt";
 import { prisma } from "../../lib/prisma";
 import { signupSchema } from "../../validations/signupSchema";
 import bcrypt from "bcrypt";
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 const saltRounds = 10;
@@ -18,7 +18,7 @@ export const signUpController = async (req: Request, res: Response) => {
       where: { email: email },
     });
     if (existing) {
-      return res.status(409).json({ message: "User already exists" }); 
+      return res.status(409).json({ message: "User already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -41,7 +41,7 @@ export const signUpController = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({
@@ -53,7 +53,7 @@ export const signUpController = async (req: Request, res: Response) => {
       message: "Internal Server Error",
     });
   }
-}
+};
 
 export const logInController = async (req: Request, res: Response) => {
   try {
@@ -89,7 +89,7 @@ export const logInController = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
@@ -101,7 +101,7 @@ export const logInController = async (req: Request, res: Response) => {
       message: "Internal Server Error",
     });
   }
-}
+};
 
 export const refreshTokenController = async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
@@ -139,18 +139,19 @@ export const refreshTokenController = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
       accessToken,
+      email: user.email,
     });
   } catch {
     res.status(400).json({
       message: "Incorrect refresh token",
     });
   }
-}
+};
 
 export const logOutController = async (req: Request, res: Response) => {
   try {
@@ -161,11 +162,11 @@ export const logOutController = async (req: Request, res: Response) => {
       data: { refreshToken: null },
     });
 
-    res.clearCookie("refreshToken", {  
+    res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-    })
+    });
 
     res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
@@ -174,4 +175,4 @@ export const logOutController = async (req: Request, res: Response) => {
       message: "Internal Server Error",
     });
   }
-}
+};
